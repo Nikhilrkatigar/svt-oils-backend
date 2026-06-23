@@ -6,6 +6,7 @@ import {
   cancelOrder,
   getAllOrders,
   updateOrderStatus,
+  deleteOrder,
 } from '../controllers/orderController.js'
 import { protect, adminOnly } from '../middleware/auth.js'
 
@@ -23,5 +24,6 @@ router.patch('/:id/cancel', cancelOrder)
 // Admin routes
 router.get('/admin/all', adminOnly, getAllOrders)
 router.patch('/:id/status', adminOnly, updateOrderStatus)
+router.delete('/:id', adminOnly, deleteOrder)
 
 export default router

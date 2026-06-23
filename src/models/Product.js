@@ -85,7 +85,7 @@ const productSchema = new mongoose.Schema({
   },
   sortOrder: {
     type: Number,
-    default: 0,
+    default: 999,
   },
 }, {
   timestamps: true,

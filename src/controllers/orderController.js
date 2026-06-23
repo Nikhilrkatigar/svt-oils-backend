@@ -184,3 +184,15 @@ export const updateOrderStatus = async (req, res, next) => {
     res.json({ order, message: `Order status updated to ${status}` })
   } catch (err) { next(err) }
 }
+
+// DELETE /api/orders/:id  (admin)
+export const deleteOrder = async (req, res, next) => {
+  try {
+    const order = await Order.findById(req.params.id)
+    if (!order) return res.status(404).json({ message: 'Order not found' })
+
+    await Order.findByIdAndDelete(req.params.id)
+
+    res.json({ message: 'Order deleted successfully' })
+  } catch (err) { next(err) }
+}

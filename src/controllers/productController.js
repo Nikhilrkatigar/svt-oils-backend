@@ -121,7 +121,7 @@ export const createProduct = async (req, res, next) => {
       description, imageUrl: imageUrl?.trim() || '', emoji, isNew: isNew || false,
       inStock: inStock !== false,
       variants: normalizedVariants,
-      sortOrder: sortOrder || 0,
+      sortOrder: sortOrder == null ? 999 : sortOrder,
     })
 
     res.status(201).json({ product, message: 'Product created' })
@@ -156,7 +156,7 @@ export const updateProduct = async (req, res, next) => {
       isNew: isNew || false,
       inStock: inStock !== false,
       variants: normalizedVariants,
-      sortOrder: sortOrder || 0,
+      sortOrder: sortOrder == null ? 999 : sortOrder,
     }
     // Remove undefined keys
     Object.keys(updates).forEach(k => updates[k] === undefined && delete updates[k])
@@ -227,7 +227,7 @@ export const seedProducts = async (req, res, next) => {
     ]
 
     await Product.deleteMany({})
-    const inserted = await Product.insertMany(seedData.map((p, i) => ({ ...p, sortOrder: i, inStock: true })))
+    const inserted = await Product.insertMany(seedData.map((p) => ({ ...p, sortOrder: 999, inStock: true })))
     res.json({ message: `✅ Seeded ${inserted.length} products`, count: inserted.length })
   } catch (err) { next(err) }
 }

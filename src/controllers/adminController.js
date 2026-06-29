@@ -31,7 +31,7 @@ export const getDashboard = async (req, res, next) => {
         { $group: { _id: null, total: { $sum: '$total' } } },
       ]),
       Order.find()
-        .populate('user', 'name phone')
+        .populate('user', 'name phone secondaryPhone gstNumber')
         .sort({ createdAt: -1 })
         .limit(5),
       Order.aggregate([
@@ -84,6 +84,7 @@ export const createUser = async (req, res, next) => {
       name,
       phone,
       secondaryPhone,
+      gstNumber,
       password,
       address = '',
       role = 'customer',
@@ -110,6 +111,7 @@ export const createUser = async (req, res, next) => {
       name: name.trim(),
       phone,
       secondaryPhone: secondaryPhone || '',
+      gstNumber: gstNumber?.trim() || '',
       password,
       address: address.trim(),
       role,
@@ -139,6 +141,7 @@ export const updateUser = async (req, res, next) => {
       name,
       phone,
       secondaryPhone,
+      gstNumber,
       password,
       address,
       role,
@@ -167,6 +170,9 @@ export const updateUser = async (req, res, next) => {
         if (existing) return res.status(409).json({ message: 'Another user already uses this secondary phone number' })
       }
       user.secondaryPhone = secondaryPhone || ''
+    }
+    if (gstNumber !== undefined) {
+      user.gstNumber = gstNumber?.trim() || ''
     }
     if (name !== undefined) {
       if (!name.trim()) return res.status(400).json({ message: 'Name is required' })

@@ -11,6 +11,7 @@ import productRoutes from './routes/productRoutes.js'
 import orderRoutes from './routes/orderRoutes.js'
 import locationRoutes from './routes/locationRoutes.js'
 import adminRoutes from './routes/adminRoutes.js'
+import settingsRoutes from './routes/settingsRoutes.js'
 import { notFound, errorHandler } from './middleware/errorHandler.js'
 import { ensureAdminUser } from './utils/ensureAdmin.js'
 
@@ -71,6 +72,7 @@ app.use('/api/products', productRoutes)
 app.use('/api/orders', orderRoutes)
 app.use('/api/location', locationRoutes)
 app.use('/api/admin', adminRoutes)
+app.use('/api/settings', settingsRoutes)
 
 // ─── Error handling ───────────────────────────────────
 app.use(notFound)

@@ -18,7 +18,7 @@ const normalizeVariants = (variants = []) => {
         weight: v.weight.trim(),
         price,
         discountPrice,
-        isNegotiable: price === null ? true : Boolean(v.isNegotiable),
+        isNegotiable: price === null ? true : false,
         inStock: v.inStock !== false,
       }
     })

@@ -30,6 +30,11 @@ const userSchema = new mongoose.Schema({
     default: '',
     maxlength: 500,
   },
+  gstNumber: {
+    type: String,
+    default: '',
+    trim: true,
+  },
   addressLocation: {
     lat: {
       type: Number,

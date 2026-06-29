@@ -32,7 +32,7 @@ export const placeOrder = async (req, res, next) => {
     }
     if (idempotencyKey) {
       const existingOrder = await Order.findOne({ user: req.user._id, idempotencyKey })
-        .populate('user', 'name phone')
+        .populate('user', 'name phone secondaryPhone gstNumber')
       if (existingOrder) {
         return res.status(200).json({
           order: existingOrder,
@@ -60,7 +60,7 @@ export const placeOrder = async (req, res, next) => {
     await User.findByIdAndUpdate(req.user._id, { $inc: { orderCount: 1 } })
 
     // Populate user for response
-    await order.populate('user', 'name phone')
+    await order.populate('user', 'name phone secondaryPhone gstNumber')
 
     res.status(201).json({ order, message: 'Order placed successfully!' })
   } catch (err) {
@@ -68,7 +68,7 @@ export const placeOrder = async (req, res, next) => {
       const existingOrder = await Order.findOne({
         user: req.user._id,
         idempotencyKey: req.body.idempotencyKey,
-      }).populate('user', 'name phone')
+      }).populate('user', 'name phone secondaryPhone gstNumber')
       if (existingOrder) {
         return res.status(200).json({
           order: existingOrder,
@@ -101,7 +101,7 @@ export const getMyOrders = async (req, res, next) => {
 // GET /api/orders/:id  (user — own orders only)
 export const getOrder = async (req, res, next) => {
   try {
-    const order = await Order.findById(req.params.id).populate('user', 'name phone')
+    const order = await Order.findById(req.params.id).populate('user', 'name phone secondaryPhone gstNumber')
     if (!order) return res.status(404).json({ message: 'Order not found' })
 
     // Users can only see their own orders; admins can see all
@@ -145,7 +145,7 @@ export const getAllOrders = async (req, res, next) => {
     if (status && status !== 'all') filter.status = status
 
     let orders = await Order.find(filter)
-      .populate('user', 'name phone address')
+      .populate('user', 'name phone address secondaryPhone gstNumber')
       .sort({ createdAt: -1 })
       .limit(Number(limit))
       .skip((Number(page) - 1) * Number(limit))

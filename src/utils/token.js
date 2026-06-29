@@ -12,6 +12,8 @@ export const formatUser = (user) => ({
   _id: user._id,
   name: user.name,
   phone: user.phone,
+  secondaryPhone: user.secondaryPhone || '',
+  gstNumber: user.gstNumber || '',
   address: user.address,
   addressLocation: user.addressLocation,
   isAdmin: user.isAdmin,

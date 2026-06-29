@@ -6,6 +6,7 @@ import {
   getUserDetail,
   updateUser,
   toggleBlockUser,
+  deleteUser,
 } from '../controllers/adminController.js'
 import { protect, adminOnly } from '../middleware/auth.js'
 
@@ -19,5 +20,6 @@ router.post('/users', createUser)
 router.get('/users/:id', getUserDetail)
 router.put('/users/:id', updateUser)
 router.patch('/users/:id/block', toggleBlockUser)
+router.delete('/users/:id', deleteUser)
 
 export default router

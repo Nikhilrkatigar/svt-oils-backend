@@ -213,3 +213,18 @@ export const toggleBlockUser = async (req, res, next) => {
     res.json({ message: `User ${user.isBlocked ? 'blocked' : 'unblocked'}`, user })
   } catch (err) { next(err) }
 }
+
+// DELETE /api/admin/users/:id
+export const deleteUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id)
+    if (!user) return res.status(404).json({ message: 'User not found' })
+
+    if (user.isAdmin || user.phone === process.env.ADMIN_PHONE) {
+      return res.status(400).json({ message: 'Cannot delete admin users' })
+    }
+
+    await User.findByIdAndDelete(req.params.id)
+    res.json({ message: 'User deleted successfully' })
+  } catch (err) { next(err) }
+}

@@ -91,7 +91,9 @@ const productSchema = new mongoose.Schema({
   timestamps: true,
 })
 
-// Text index for search
+// Indexes
 productSchema.index({ name: 'text', brand: 'text', category: 'text' })
+productSchema.index({ category: 1 })
+productSchema.index({ sortOrder: 1, createdAt: -1 })
 
 export default mongoose.model('Product', productSchema)

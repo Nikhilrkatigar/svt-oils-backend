@@ -119,11 +119,17 @@ export const cancelOrder = async (req, res, next) => {
     const order = await Order.findById(req.params.id)
     if (!order) return res.status(404).json({ message: 'Order not found' })
 
-    if (String(order.user) !== String(req.user._id) && !req.user.isAdmin) {
-      return res.status(403).json({ message: 'Not authorized' })
-    }
-    if (!['pending', 'confirmed'].includes(order.status)) {
-      return res.status(400).json({ message: `Cannot cancel order in "${order.status}" status` })
+    if (!req.user.isAdmin) {
+      if (String(order.user) !== String(req.user._id)) {
+        return res.status(403).json({ message: 'Not authorized' })
+      }
+      if (order.status !== 'pending') {
+        return res.status(400).json({ message: `Cannot cancel order after it has been ${order.status}` })
+      }
+    } else {
+      if (!['pending', 'confirmed', 'shipped'].includes(order.status)) {
+        return res.status(400).json({ message: `Cannot cancel order in "${order.status}" status` })
+      }
     }
 
     order.status = 'cancelled'

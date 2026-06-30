@@ -8,7 +8,7 @@ import {
   toggleBlockUser,
   deleteUser,
 } from '../controllers/adminController.js'
-import { protect, adminOnly } from '../middleware/auth.js'
+import { protect, adminOnly, strictAdminOnly } from '../middleware/auth.js'
 
 const router = express.Router()
 
@@ -20,6 +20,6 @@ router.post('/users', createUser)
 router.get('/users/:id', getUserDetail)
 router.put('/users/:id', updateUser)
 router.patch('/users/:id/block', toggleBlockUser)
-router.delete('/users/:id', deleteUser)
+router.delete('/users/:id', strictAdminOnly, deleteUser)
 
 export default router

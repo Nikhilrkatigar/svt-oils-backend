@@ -10,7 +10,7 @@ import {
   seedProducts,
   getSuggestedProducts,
 } from '../controllers/productController.js'
-import { protect, adminOnly } from '../middleware/auth.js'
+import { protect, adminOnly, strictAdminOnly } from '../middleware/auth.js'
 
 const router = express.Router()
 
@@ -49,7 +49,7 @@ router.get('/:id', getProduct)
 router.post('/', protect, adminOnly, createProduct)
 router.post('/upload-image', protect, adminOnly, uploadProductImage)
 router.put('/:id', protect, adminOnly, updateProduct)
-router.delete('/:id', protect, adminOnly, deleteProduct)
+router.delete('/:id', protect, adminOnly, strictAdminOnly, deleteProduct)
 router.post('/admin/seed', protect, adminOnly, seedProducts)
 
 export default router

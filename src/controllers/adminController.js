@@ -31,7 +31,7 @@ export const getDashboard = async (req, res, next) => {
         { $group: { _id: null, total: { $sum: '$total' } } },
       ]),
       Order.find()
-        .populate('user', 'name phone secondaryPhone gstNumber')
+        .populate('user', 'name phone secondaryPhone gstNumber pinCode')
         .sort({ createdAt: -1 })
         .limit(5),
       Order.aggregate([
@@ -85,6 +85,7 @@ export const createUser = async (req, res, next) => {
       phone,
       secondaryPhone,
       gstNumber,
+      pinCode,
       password,
       address = '',
       role = 'customer',
@@ -94,6 +95,7 @@ export const createUser = async (req, res, next) => {
     if (!name?.trim()) return res.status(400).json({ message: 'Name is required' })
     if (!isValidPhone(phone)) return res.status(400).json({ message: 'Enter a valid 10-digit primary phone number' })
     if (secondaryPhone && !isValidPhone(secondaryPhone)) return res.status(400).json({ message: 'Enter a valid 10-digit secondary phone number' })
+    if (!pinCode || !/^\d{6}$/.test(pinCode)) return res.status(400).json({ message: 'Enter a valid 6-digit pin code' })
     if (!password || password.length < 6) return res.status(400).json({ message: 'Password must be at least 6 characters' })
     if (!['customer', 'staff', 'admin'].includes(role)) return res.status(400).json({ message: 'Invalid role' })
 
@@ -112,6 +114,7 @@ export const createUser = async (req, res, next) => {
       phone,
       secondaryPhone: secondaryPhone || '',
       gstNumber: gstNumber?.trim() || '',
+      pinCode: pinCode?.trim() || '',
       password,
       address: address.trim(),
       role,
@@ -142,6 +145,7 @@ export const updateUser = async (req, res, next) => {
       phone,
       secondaryPhone,
       gstNumber,
+      pinCode,
       password,
       address,
       role,
@@ -173,6 +177,10 @@ export const updateUser = async (req, res, next) => {
     }
     if (gstNumber !== undefined) {
       user.gstNumber = gstNumber?.trim() || ''
+    }
+    if (pinCode !== undefined) {
+      if (!pinCode || !/^\d{6}$/.test(pinCode)) return res.status(400).json({ message: 'Enter a valid 6-digit pin code' })
+      user.pinCode = pinCode.trim()
     }
     if (name !== undefined) {
       if (!name.trim()) return res.status(400).json({ message: 'Name is required' })

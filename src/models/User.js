@@ -35,6 +35,13 @@ const userSchema = new mongoose.Schema({
     default: '',
     trim: true,
   },
+  pinCode: {
+    type: String,
+    required: [true, 'Pin Code is required'],
+    match: [/^\d{6}$/, 'Enter a valid 6-digit Pin Code'],
+    default: '570001',
+    trim: true,
+  },
   addressLocation: {
     lat: {
       type: Number,

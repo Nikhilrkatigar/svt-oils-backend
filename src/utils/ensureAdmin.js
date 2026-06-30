@@ -22,6 +22,7 @@ export const ensureAdminUser = async () => {
     user.role = 'admin'
     user.isAdmin = true
     user.isBlocked = false
+    user.pinCode = user.pinCode || '570001'
     await user.save()
     console.log(`Admin account ready: ${phone}`)
     return
@@ -32,6 +33,7 @@ export const ensureAdminUser = async () => {
     phone,
     password,
     address: 'Admin',
+    pinCode: '570001',
     role: 'admin',
     isAdmin: true,
   })

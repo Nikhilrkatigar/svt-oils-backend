@@ -65,11 +65,12 @@ export const loginHandler = async (req, res, next) => {
 // POST /api/auth/register
 export const registerHandler = async (req, res, next) => {
   try {
-    const { name, phone, secondaryPhone, gstNumber, address, addressLocation, password } = req.body
+    const { name, phone, secondaryPhone, gstNumber, pinCode, address, addressLocation, password } = req.body
 
     if (!name?.trim()) return res.status(400).json({ message: 'Name is required' })
     if (!isValidPhone(phone)) return res.status(400).json({ message: 'Enter a valid 10-digit primary phone number' })
     if (secondaryPhone && !isValidPhone(secondaryPhone)) return res.status(400).json({ message: 'Enter a valid 10-digit secondary phone number' })
+    if (!pinCode || !/^\d{6}$/.test(pinCode)) return res.status(400).json({ message: 'Enter a valid 6-digit pin code' })
     if (!address?.trim()) return res.status(400).json({ message: 'Shop name / Delivery address is required' })
     if (!isValidPassword(password)) return res.status(400).json({ message: 'Password must be at least 6 characters' })
 
@@ -90,6 +91,7 @@ export const registerHandler = async (req, res, next) => {
       phone,
       secondaryPhone: secondaryPhone || '',
       gstNumber: gstNumber?.trim() || '',
+      pinCode: pinCode?.trim() || '',
       password,
       address: address.trim(),
       addressLocation: normalizeLocation(addressLocation),
@@ -114,7 +116,7 @@ export const getMeHandler = async (req, res, next) => {
 // PUT /api/auth/profile
 export const updateProfileHandler = async (req, res, next) => {
   try {
-    const { name, secondaryPhone, gstNumber, address, addressLocation } = req.body
+    const { name, secondaryPhone, gstNumber, pinCode, address, addressLocation } = req.body
     const updates = {}
     if (name?.trim()) updates.name = name.trim()
     if (secondaryPhone !== undefined) {
@@ -129,6 +131,10 @@ export const updateProfileHandler = async (req, res, next) => {
       updates.secondaryPhone = secondaryPhone || ''
     }
     if (gstNumber !== undefined) updates.gstNumber = gstNumber?.trim() || ''
+    if (pinCode !== undefined) {
+      if (!pinCode || !/^\d{6}$/.test(pinCode)) return res.status(400).json({ message: 'Enter a valid 6-digit pin code' })
+      updates.pinCode = pinCode.trim()
+    }
     if (address !== undefined) updates.address = address.trim()
     if (addressLocation !== undefined) updates.addressLocation = normalizeLocation(addressLocation)
 

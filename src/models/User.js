@@ -34,6 +34,13 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: '',
     trim: true,
+    validate: {
+      validator: function(v) {
+        if (!v) return true;
+        return /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(v);
+      },
+      message: props => `${props.value} is not a valid GST number!`
+    }
   },
   pinCode: {
     type: String,
@@ -75,6 +82,10 @@ const userSchema = new mongoose.Schema({
     default: false,
   },
   orderCount: {
+    type: Number,
+    default: 0,
+  },
+  visitCount: {
     type: Number,
     default: 0,
   },

@@ -25,6 +25,7 @@ const issueAuthResponse = async (user, res, statusCode = 200) => {
     user.role = 'admin'
   }
   user.lastLogin = new Date()
+  user.visitCount = (user.visitCount || 0) + 1
   await user.save()
 
   const token = signToken(user._id)
@@ -98,6 +99,7 @@ export const registerHandler = async (req, res, next) => {
       isAdmin: phone === process.env.ADMIN_PHONE,
       role: phone === process.env.ADMIN_PHONE ? 'admin' : 'customer',
       lastLogin: new Date(),
+      visitCount: 1,
     })
 
     const token = signToken(user._id)

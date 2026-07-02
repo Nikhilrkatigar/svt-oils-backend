@@ -7,6 +7,7 @@ import {
   getAllOrders,
   updateOrderStatus,
   deleteOrder,
+  exportOrdersToCSV,
 } from '../controllers/orderController.js'
 import { protect, adminOnly, strictAdminOnly } from '../middleware/auth.js'
 
@@ -22,6 +23,7 @@ router.get('/:id', getOrder)
 router.patch('/:id/cancel', cancelOrder)
 
 // Admin routes
+router.get('/admin/export', adminOnly, exportOrdersToCSV)
 router.get('/admin/all', adminOnly, getAllOrders)
 router.patch('/:id/status', adminOnly, updateOrderStatus)
 router.delete('/:id', adminOnly, strictAdminOnly, deleteOrder)

@@ -1,6 +1,7 @@
 import express from 'express'
 import {
   getDashboard,
+  getVisitors,
   createUser,
   getUsers,
   getUserDetail,
@@ -15,6 +16,7 @@ const router = express.Router()
 router.use(protect, adminOnly)
 
 router.get('/dashboard', getDashboard)
+router.get('/visitors', getVisitors)
 router.get('/users', getUsers)
 router.post('/users', createUser)
 router.get('/users/:id', getUserDetail)

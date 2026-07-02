@@ -150,23 +150,29 @@ export const getAllOrders = async (req, res, next) => {
     const filter = {}
     if (status && status !== 'all') filter.status = status
 
-    let orders = await Order.find(filter)
+    if (search) {
+      const s = search.trim()
+      const users = await User.find({
+        $or: [
+          { name: { $regex: s, $options: 'i' } },
+          { phone: { $regex: s, $options: 'i' } },
+        ]
+      }).select('_id')
+      const userIds = users.map(u => u._id)
+
+      filter.$or = [
+        { user: { $in: userIds } },
+        { orderId: { $regex: s, $options: 'i' } },
+      ]
+    }
+
+    const total = await Order.countDocuments(filter)
+    const orders = await Order.find(filter)
       .populate('user', 'name phone address secondaryPhone gstNumber pinCode')
       .sort({ createdAt: -1 })
       .limit(Number(limit))
       .skip((Number(page) - 1) * Number(limit))
 
-    // Client-side search on user name/phone if search param given
-    if (search) {
-      const s = search.toLowerCase()
-      orders = orders.filter(o =>
-        o.user?.name?.toLowerCase().includes(s) ||
-        o.user?.phone?.includes(s) ||
-        o.orderId?.toLowerCase().includes(s)
-      )
-    }
-
-    const total = await Order.countDocuments(filter)
     res.json({ orders, total, page: Number(page) })
   } catch (err) { next(err) }
 }
@@ -191,7 +197,6 @@ export const updateOrderStatus = async (req, res, next) => {
   } catch (err) { next(err) }
 }
 
-// DELETE /api/orders/:id  (admin)
 export const deleteOrder = async (req, res, next) => {
   try {
     const order = await Order.findById(req.params.id)
@@ -201,4 +206,81 @@ export const deleteOrder = async (req, res, next) => {
 
     res.json({ message: 'Order deleted successfully' })
   } catch (err) { next(err) }
+}
+
+export const exportOrdersToCSV = async (req, res, next) => {
+  try {
+    const orders = await Order.find()
+      .populate('user', 'name phone secondaryPhone gstNumber pinCode')
+      .sort({ createdAt: -1 })
+
+    const headers = [
+      'Order ID', 'Date', 'Status', 'Customer Name', 'Customer Phone',
+      'Secondary Phone', 'Shop Name / Address', 'GST Number', 'Pin Code',
+      'Item Name', 'Item Brand', 'Item Weight', 'Quantity', 'Unit Price',
+      'Item Subtotal', 'Is Negotiable Item', 'Order Total', 'Negotiable Order', 'Note'
+    ]
+
+    const escapeCsv = (val) => {
+      if (val == null) return ''
+      const str = String(val)
+      if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+        return '"' + str.replace(/"/g, '""') + '"'
+      }
+      return str
+    }
+
+    const rows = []
+    rows.push(headers.join(','))
+
+    orders.forEach(order => {
+      const orderId = order.orderId || order._id
+      const orderDate = new Date(order.createdAt).toLocaleString('en-IN')
+      const orderStatus = order.status
+      const customerName = order.user?.name || 'Unknown'
+      const customerPhone = order.phone || order.user?.phone || ''
+      const secondaryPhone = order.user?.secondaryPhone || ''
+      const shopAddress = order.deliveryAddress || ''
+      const gstNumber = order.user?.gstNumber || ''
+      const pinCode = order.user?.pinCode || ''
+      const orderTotal = order.total || 0
+      const isNegotiableOrder = order.hasNegotiable ? 'Yes' : 'No'
+      const orderNote = order.note || ''
+
+      if (!order.items || order.items.length === 0) {
+        const rowData = [
+          orderId, orderDate, orderStatus, customerName, customerPhone,
+          secondaryPhone, shopAddress, gstNumber, pinCode,
+          '', '', '', '', '', '', '',
+          orderTotal, isNegotiableOrder, orderNote
+        ]
+        rows.push(rowData.map(escapeCsv).join(','))
+      } else {
+        order.items.forEach(item => {
+          const itemName = item.name || ''
+          const itemBrand = item.brand || ''
+          const itemWeight = item.weight || ''
+          const qty = item.qty || 0
+          const unitPrice = item.price || 0
+          const itemSubtotal = unitPrice * qty
+          const isNegotiableItem = item.isNegotiable ? 'Yes' : 'No'
+
+          const rowData = [
+            orderId, orderDate, orderStatus, customerName, customerPhone,
+            secondaryPhone, shopAddress, gstNumber, pinCode,
+            itemName, itemBrand, itemWeight, qty, unitPrice, itemSubtotal, isNegotiableItem,
+            orderTotal, isNegotiableOrder, orderNote
+          ]
+          rows.push(rowData.map(escapeCsv).join(','))
+        })
+      }
+    })
+
+    const csvContent = '\uFEFF' + rows.join('\r\n')
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8')
+    res.setHeader('Content-Disposition', `attachment; filename=SVT_Oils_Orders_All_${new Date().toISOString().slice(0, 10)}.csv`)
+    res.status(200).send(csvContent)
+  } catch (err) {
+    next(err)
+  }
 }

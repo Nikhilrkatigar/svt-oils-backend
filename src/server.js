@@ -21,6 +21,8 @@ await ensureAdminUser()
 
 const app = express()
 
+app.set('trust proxy', 1)
+
 // ─── Security ─────────────────────────────────────────
 app.use(helmet())
 app.use(cors({
@@ -84,6 +86,16 @@ app.listen(PORT, () => {
   console.log(`\n🫙  SVT Oils API running on port ${PORT}`)
   console.log(`🌍  Environment: ${process.env.NODE_ENV || 'development'}`)
   console.log(`🔗  Health: http://localhost:${PORT}/api/health\n`)
+})
+
+// ─── Uncaught exceptions & Unhandled rejections ───────
+process.on('uncaughtException', (err) => {
+  console.error('🔥 CRITICAL: Uncaught Exception:', err.message)
+  console.error(err.stack)
+})
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('🔥 CRITICAL: Unhandled Rejection at:', promise, 'reason:', reason)
 })
 
 export default app

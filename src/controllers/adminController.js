@@ -77,6 +77,31 @@ export const getUsers = async (req, res, next) => {
   } catch (err) { next(err) }
 }
 
+// GET /api/admin/visitors — users ranked by number of visits (each login = 1 visit)
+export const getVisitors = async (req, res, next) => {
+  try {
+    const { page = 1, limit = 50, search } = req.query
+    const filter = {}
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { phone: { $regex: search, $options: 'i' } },
+      ]
+    }
+
+    const total = await User.countDocuments(filter)
+    const users = await User.find(filter)
+      .select('name phone secondaryPhone visitCount lastLogin orderCount role')
+      .sort({ visitCount: -1, lastLogin: -1 })
+      .limit(Number(limit))
+      .skip((Number(page) - 1) * Number(limit))
+
+    const totalVisits = users.reduce((sum, u) => sum + (u.visitCount || 0), 0)
+
+    res.json({ visitors: users, total, totalVisits, page: Number(page) })
+  } catch (err) { next(err) }
+}
+
 // POST /api/admin/users
 export const createUser = async (req, res, next) => {
   try {
